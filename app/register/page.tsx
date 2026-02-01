@@ -25,7 +25,7 @@ export default function RegisterPage() {
       });
 
       if (res.ok) {
-        router.push("/");
+        router.push("/chat");
         router.refresh();
       } else {
         const data = await res.json();
@@ -53,9 +53,9 @@ export default function RegisterPage() {
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
-        className="bg-white/70 backdrop-blur-xl border border-white/50 p-8 rounded-3xl shadow-2xl w-full max-w-md z-10 relative"
+        className="bg-white/70 backdrop-blur-xl border border-white/50 p-6 xs:p-8 rounded-3xl shadow-2xl w-[94%] xs:w-full max-w-md z-10 relative"
       >
-        <h2 className="text-3xl font-bold text-gray-800 mb-2 text-center">
+        <h2 className="text-2xl xs:text-3xl font-bold text-gray-800 mb-2 text-center">
           Create Account
         </h2>
         <p className="text-gray-500 text-center mb-8">Join HexaMate today</p>

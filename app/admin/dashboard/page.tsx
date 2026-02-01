@@ -50,15 +50,15 @@ export default function AdminDashboard() {
     return (
         <div className="min-h-screen bg-black text-white-400 font-mono p-8">
             <div className="max-w-7xl mx-auto">
-                <header className="flex justify-between items-center mb-8 border-b border-blue-800 pb-4">
-                    <h1 className="text-3xl font-bold">HEXAMATE ADMIN PANEL</h1>
-                    <button onClick={() => router.push('/')} className="px-4 py-2 border border-blue-600 hover:bg-blue-900 rounded cursor-pointer transition">
+                <header className="flex flex-col xs:flex-row justify-between items-center mb-8 border-b border-blue-800 pb-4 gap-4">
+                    <h1 className="text-xl xs:text-2xl md:text-3xl font-bold text-center xs:text-left">HEXAMATE ADMIN PANEL</h1>
+                    <button onClick={() => router.push('/')} className="w-full xs:w-auto px-4 py-2 border border-blue-600 hover:bg-blue-900 rounded cursor-pointer transition text-sm">
                         Exit to Frontend
                     </button>
                 </header>
 
-                <div className="bg-gray-900 rounded-lg overflow-hidden border border-blue-800 shadow-2xl">
-                    <table className="w-full text-left">
+                <div className="bg-gray-900 rounded-lg overflow-x-auto border border-blue-800 shadow-2xl no-scrollbar">
+                    <table className="w-full text-left min-w-[600px]">
                         <thead className="bg-blue-900 text-gray-300">
                             <tr>
                                 <th className="p-4">USER ID</th>

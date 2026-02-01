@@ -22,7 +22,7 @@ export default function AdminLogin() {
             if (res.ok) {
                 const data = await res.json()
                 if (data.user.id) {
-                    
+
                     router.push('/admin/dashboard')
                 }
             } else {
@@ -34,9 +34,9 @@ export default function AdminLogin() {
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-black text-white">
-            <div className="w-full max-w-md p-8 border border-gray-800 rounded-xl bg-gray-900">
-                <h1 className="text-2xl font-bold mb-6 text-white-500">ADMIN ACCESS</h1>
+        <div className="min-h-screen flex items-center justify-center bg-black text-white p-4">
+            <div className="w-full max-w-md p-6 xs:p-8 border border-gray-800 rounded-xl bg-gray-900">
+                <h1 className="text-xl xs:text-2xl font-bold mb-6 text-white-500">ADMIN ACCESS</h1>
                 {error && <p className="text-red-400 mb-4">{error}</p>}
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <input
