@@ -28,7 +28,7 @@ yarn-error.log*
 .pnpm-debug.log*
 
 # env files
-# .env* (Allowed for school project exhibition)
+.env*
 
 # vercel
 .vercel
