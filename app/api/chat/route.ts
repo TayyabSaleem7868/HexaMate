@@ -21,13 +21,13 @@ function mapRole(role?: string) {
 function maskKey(k?: string) {
     if (!k) return '<missing>'
     if (k.length <= 8) return k.replace(/./g, '*')
-    return `${k.slice(0,4)}...${k.slice(-4)}`
+    return `${k.slice(0, 4)}...${k.slice(-4)}`
 }
 
 export async function POST(request: Request) {
     try {
         console.debug('[api/chat] invoked', { url: (request as any).url ?? '<unknown>' })
-    } catch (_) {}
+    } catch (_) { }
 
     const session = await getSession()
     if (!session) {
@@ -55,7 +55,7 @@ export async function POST(request: Request) {
         const summary = Array.isArray(body?.messages)
             ? { messagesCount: body.messages.length }
             : body?.message
-                ? { message: typeof body.message === 'string' ? `${(body.message as string).slice(0,80)}${(body.message as string).length>80?'...':''}` : '<non-string>' }
+                ? { message: typeof body.message === 'string' ? `${(body.message as string).slice(0, 80)}${(body.message as string).length > 80 ? '...' : ''}` : '<non-string>' }
                 : { keys: Object.keys(body ?? {}) }
         console.debug('[api/chat] request body summary:', summary)
     } catch (e) {
@@ -105,7 +105,7 @@ export async function POST(request: Request) {
             }
         }
 
-  
+
         const isExistingChat = Boolean(currentChatId)
         const pendingUserMessages = messages.filter(m => mapRole(m.role) === 'user')
 
@@ -127,10 +127,10 @@ export async function POST(request: Request) {
         }))
 
 
-    const modelName = process.env.GOOGLE_MODEL || 'models/gemini-1.5-flash'
-    console.debug('[api/chat] using model:', modelName)
-    const genAI = new GoogleGenerativeAI(apiKey)
-    const model = genAI.getGenerativeModel({ model: modelName })
+        const modelName = process.env.GOOGLE_MODEL || 'models/gemini-2.5-flash'
+        console.debug('[api/chat] using model:', modelName)
+        const genAI = new GoogleGenerativeAI(apiKey)
+        const model = genAI.getGenerativeModel({ model: modelName })
 
         let aiText = ''
         try {
@@ -153,15 +153,15 @@ export async function POST(request: Request) {
                     console.error('[api/chat] upstream response body:', resp)
                     return NextResponse.json({ error: { message: `Upstream model not found: ${modelName}. The model may be unsupported for this API version. Try setting GOOGLE_MODEL to a supported model (e.g. models/text-bison-001) or call ListModels to inspect available models.` } }, { status: 502 })
                 }
- 
+
                 console.error('[api/chat] upstream response body:', resp)
                 return NextResponse.json({ error: { message: e.message } }, { status })
             }
-    
+
             return NextResponse.json({ error: { message: e?.message ?? 'Upstream service error' } }, { status: 502 })
         }
 
-  
+
         if (!isExistingChat) {
             const firstUser = pendingUserMessages[0]
             const titleSource = (firstUser?.content ?? firstUser?.text ?? 'Conversation').toString()
@@ -219,7 +219,7 @@ export async function GET(request: Request) {
         const where: any = { userId: session.id }
         if (q) where.title = { contains: q, mode: 'insensitive' }
 
- 
+
         const chats = await prisma.chat.findMany({
             where,
             orderBy: { updatedAt: 'desc' },
