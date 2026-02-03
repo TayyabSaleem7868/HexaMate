@@ -127,7 +127,7 @@ export async function POST(request: Request) {
         }))
 
 
-    const modelName = process.env.GOOGLE_MODEL || 'models/gemini-2.5-flash'
+    const modelName = process.env.GOOGLE_MODEL || 'models/gemini-1.5-flash'
     console.debug('[api/chat] using model:', modelName)
     const genAI = new GoogleGenerativeAI(apiKey)
     const model = genAI.getGenerativeModel({ model: modelName })
