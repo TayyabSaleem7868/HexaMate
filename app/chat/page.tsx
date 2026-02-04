@@ -4,7 +4,6 @@ import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import LoadingScreen from "@/components/ui/LoadingScreen";
 
 interface Message {
   role: "user" | "model";
@@ -39,8 +38,6 @@ export default function Home() {
   } | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const [initialLoad, setInitialLoad] = useState(true);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -98,7 +95,6 @@ export default function Home() {
       console.error("Failed to fetch chats", e);
     } finally {
       setLoadingChats(false);
-      setInitialLoad(false);
     }
   };
 
@@ -128,7 +124,6 @@ export default function Home() {
   };
 
   const handleLogout = async () => {
-    setIsLoggingOut(true);
     await fetch("/api/auth/logout", { method: "POST" });
     router.push("/login");
   };
@@ -234,14 +229,6 @@ export default function Home() {
   };
 
   const handleDeleteChat = async (id: string) => {
-    // Optimistic Update: Remove from UI immediately
-    const previousChats = [...chats];
-    setChats((prev) => prev.filter((c) => c.id !== id));
-    if (chatId === id) {
-      setChatId(null);
-      setMessages([]);
-    }
-
     try {
       const res = await fetch("/api/chat", {
         method: "DELETE",
@@ -249,14 +236,16 @@ export default function Home() {
         body: JSON.stringify({ chatId: id }),
       });
       if (!res.ok) {
-        // Rollback on error
-        setChats(previousChats);
         if (res.status === 401) router.push("/login");
         return;
       }
+      setChats((prev) => prev.filter((c) => c.id !== id));
+      if (chatId === id) {
+        setChatId(null);
+        setMessages([]);
+      }
     } catch (e) {
       console.error("Failed to delete chat", e);
-      setChats(previousChats);
     }
   };
 
@@ -679,10 +668,11 @@ export default function Home() {
                     <div
                       className={`
                                   max-w-[92%] xs:max-w-[85%] md:max-w-[75%] px-5 md:px-6 py-3.5 md:py-4 rounded-2xl md:rounded-3xl text-base md:text-sm leading-relaxed
-                                  ${msg.role === "user"
-                          ? "bg-blue-600 text-white rounded-br-none"
-                          : "bg-white text-gray-700 rounded-bl-none border border-gray-100"
-                        }
+                                  ${
+                                    msg.role === "user"
+                                      ? "bg-blue-600 text-white rounded-br-none"
+                                      : "bg-white text-gray-700 rounded-bl-none border border-gray-100"
+                                  }
                             `}
                     >
                       {msg.content}
@@ -812,11 +802,6 @@ export default function Home() {
               </motion.div>
             </motion.div>
           )}
-        </AnimatePresence>
-
-        <AnimatePresence>
-          {initialLoad && <LoadingScreen message="Syncing with HexaMate..." />}
-          {isLoggingOut && <LoadingScreen message="Signing out safely..." />}
         </AnimatePresence>
       </main>
     </div>

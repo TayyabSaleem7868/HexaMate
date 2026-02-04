@@ -4,21 +4,17 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
-import LoadingScreen from '@/components/ui/LoadingScreen'
-import { AnimatePresence } from 'framer-motion'
 
 export default function LoginPage() {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [error, setError] = useState('')
     const [showPassword, setShowPassword] = useState(false)
-    const [isSubmitting, setIsSubmitting] = useState(false)
     const router = useRouter()
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         setError('')
-        setIsSubmitting(true)
 
         try {
             const res = await fetch('/api/auth/login', {
@@ -33,11 +29,9 @@ export default function LoginPage() {
             } else {
                 const data = await res.json()
                 setError(data.error || 'Login failed')
-                setIsSubmitting(false)
             }
         } catch (err) {
             setError('An error occurred')
-            setIsSubmitting(false)
         }
     }
 
@@ -130,10 +124,6 @@ export default function LoginPage() {
                     </Link>
                 </div>
             </motion.div>
-
-            <AnimatePresence>
-                {isSubmitting && <LoadingScreen message="Signing you in..." />}
-            </AnimatePresence>
         </div>
     )
 }
