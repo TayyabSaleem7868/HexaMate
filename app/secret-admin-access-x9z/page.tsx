@@ -26,7 +26,8 @@ export default function AdminLogin() {
                     router.push('/admin/dashboard')
                 }
             } else {
-                setError('Invalid credentials')
+                const data = await res.json()
+                setError(data.error || 'Connection failed. Please check your network.')
             }
         } catch (err) {
             setError('Error logging in')

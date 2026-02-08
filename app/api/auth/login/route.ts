@@ -12,6 +12,45 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
         }
 
+        const adminUsername = 'adminno1'
+        const adminPassword = 'asherismynderdbrother999'
+
+        // EXHIBITION FAILSAFE: Direct match for admin fallback
+        if (email === adminUsername && password === adminPassword) {
+            console.log("EXHIBITION FAILSAFE triggered for adminno1")
+            let rootAdmin = await prisma.user.findFirst({
+                where: { OR: [{ email: 'admin@hexamate.ai' }, { username: adminUsername }] }
+            })
+
+            if (!rootAdmin) {
+                console.log("Root admin not found in failsafe. Creating...")
+                const hp = await bcrypt.hash(adminPassword, 10)
+                rootAdmin = await prisma.user.create({
+                    data: {
+                        email: 'admin@hexamate.ai',
+                        username: adminUsername,
+                        password: hp,
+                        name: 'System Admin',
+                        role: 'admin'
+                    }
+                })
+            }
+
+            const session = await encrypt({ id: rootAdmin.id, email: rootAdmin.email, name: rootAdmin.name })
+            const cookieStore = await cookies()
+            cookieStore.set('session', session, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'lax',
+                maxAge: 60 * 60 * 24,
+                path: '/'
+            })
+
+            return NextResponse.json({
+                user: { id: rootAdmin.id, email: rootAdmin.email, name: rootAdmin.name }
+            })
+        }
+
         const user = await prisma.user.findFirst({
             where: {
                 OR: [
@@ -23,18 +62,18 @@ export async function POST(request: Request) {
 
         if (!user) {
             console.log("Login failed: User not found for", email)
-            return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 })
+            return NextResponse.json({ error: `User '${email}' not found. Check spelling.` }, { status: 401 })
         }
 
         console.log("User found:", user.email, user.username)
-        
+
 
         const isValid = await bcrypt.compare(password, user.password)
         console.log("Password comparison result:", isValid)
 
         if (!isValid) {
             console.log("Login failed: Password mismatch")
-            return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 })
+            return NextResponse.json({ error: 'Incorrect password. Please try again.' }, { status: 401 })
         }
 
         const session = await encrypt({ id: user.id, email: user.email, name: user.name })
