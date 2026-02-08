@@ -74,3 +74,22 @@ img {
   height: auto;
   display: block;
 }
+@keyframes blob-float-1 {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(40px, -30px) scale(1.05); }
+  100% { transform: translate(0, 0) scale(1); }
+}
+
+@keyframes blob-float-2 {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-30px, 20px) scale(1.1); }
+  100% { transform: translate(0, 0) scale(1); }
+}
+
+.animate-blob-1 {
+  animation: blob-float-1 22s ease-in-out infinite;
+}
+
+.animate-blob-2 {
+  animation: blob-float-2 28s ease-in-out infinite;
+}

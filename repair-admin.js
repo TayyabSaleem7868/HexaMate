@@ -10,7 +10,6 @@ async function repairAdmin() {
     console.log(`Target Username: ${username}`);
 
     try {
-        // 1. Check if user exists by username OR email (just in case)
         let user = await prisma.user.findFirst({
             where: {
                 OR: [

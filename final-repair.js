@@ -15,7 +15,6 @@ async function repair() {
     });
 
     if (!user) {
-        // Try to find by username
         user = await prisma.user.findUnique({
             where: { username: username }
         });

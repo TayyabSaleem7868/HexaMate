@@ -233,7 +233,6 @@ export default function Home() {
     const originalMessages = [...messages];
     const originalChatId = chatId;
 
-    // Optimistic Update: Remove chat immediately
     setChats((prev) => prev.filter((c) => c.id !== id));
     if (chatId === id) {
       setChatId(null);
@@ -256,7 +255,6 @@ export default function Home() {
       }
     } catch (e) {
       console.error("Failed to delete chat, rolling back", e);
-      // Rollback on failure
       setChats(originalChats);
       if (originalChatId === id) {
         setChatId(originalChatId);
@@ -295,7 +293,7 @@ export default function Home() {
         </AnimatePresence>
       </nav>
 
-      {/* blobs - Hidden on mobile for performance */}
+
       <motion.div
         animate={{ y: [0, -30, 0], x: [0, 20, 0], rotate: [0, 10, 0] }}
         transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
@@ -308,8 +306,6 @@ export default function Home() {
       />
 
       <main className="relative z-10 flex flex-col md:flex-row items-stretch h-full p-0 sm:p-4 md:p-6 lg:p-8 max-w-[1600px] mx-auto overflow-hidden">
-        {/* Sidebar responsive */}
-        {/* Desktop */}
         <aside className="hidden md:block w-72 mr-6 shrink-0 h-full overflow-hidden">
           <div className="bg-white rounded-2xl border border-gray-100 p-4 h-full flex flex-col justify-between">
             <div>
@@ -474,7 +470,6 @@ export default function Home() {
           </div>
         </aside>
 
-        {/* Mobile overlay sidebar */}
         <AnimatePresence>
           {showSidebar && (
             <>
@@ -483,11 +478,9 @@ export default function Home() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="md:hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-50"
                 onClick={() => setShowSidebar(false)}
               />
 
-              {/* Sidebar Content */}
               <motion.div
                 initial={{ x: "-100%" }}
                 animate={{ x: 0 }}
@@ -640,7 +633,6 @@ export default function Home() {
           )}
         </AnimatePresence>
 
-        {/* Chat area */}
         <div className="flex-1 h-full min-h-0 overflow-hidden">
           <motion.div
             initial={{ opacity: 0, scale: 0.98, y: 10 }}

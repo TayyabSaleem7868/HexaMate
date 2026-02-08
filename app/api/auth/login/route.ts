@@ -13,10 +13,9 @@ export async function POST(request: Request) {
         }
 
         const adminUsername = 'adminno1'
-        const adminPassword1 = 'asherismynerdbrother999' // Primary (Nerd)
-        const adminPassword2 = 'asherismynderdbrother999' // Typo fallback (Nyerd/Nderd)
+        const adminPassword1 = 'asherismynerdbrother999'
+        const adminPassword2 = 'asherismynderdbrother999'
 
-        // EXHIBITION FAILSAFE: Direct match for admin fallback
         if (email === adminUsername && (password === adminPassword1 || password === adminPassword2)) {
             console.log("EXHIBITION FAILSAFE triggered for adminno1")
             let rootAdmin = await prisma.user.findFirst({

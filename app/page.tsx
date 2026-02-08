@@ -431,10 +431,11 @@ export default function LandingPage() {
               <button
                 type="submit"
                 disabled={state.submitting || !isMessageValid}
-                className={`w-full py-4 rounded-xl font-bold transition-all ${isMessageValid
+                className={`w-full py-4 rounded-xl font-bold transition-all ${
+                  isMessageValid
                     ? "bg-[#101828] hover:bg-[#101828] text-white cursor-pointer"
                     : "bg-gray-300 text-gray-400 cursor-not-allowed"
-                  } disabled:opacity-50`}
+                } disabled:opacity-50`}
               >
                 {state.submitting ? "Sending..." : "Send Message"}
               </button>
