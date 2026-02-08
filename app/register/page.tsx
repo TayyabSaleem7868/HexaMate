@@ -156,7 +156,7 @@ export default function RegisterPage() {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             type="submit"
-            className="w-full py-3.5 rounded-xl bg-gray-900 text-white font-medium shadow-lg hover:shadow-xl hover:bg-black transition-all"
+            className="w-full py-3.5 rounded-xl bg-gray-900 text-white font-medium shadow-lg hover:shadow-xl hover:bg-black transition-all cursor-pointer"
           >
             Sign Up
           </motion.button>

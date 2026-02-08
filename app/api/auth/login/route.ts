@@ -12,19 +12,22 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
         }
 
-        const adminUsername = 'adminno1'
-        const adminPassword1 = 'asherismynerdbrother999'
-        const adminPassword2 = 'asherismynderdbrother999'
+        const adminUsername = process.env.NEXT_PUBLIC_ADMIN_USERNAME
+        const adminPassword = process.env.ADMIN_PASSWORD
 
-        if (email === adminUsername && (password === adminPassword1 || password === adminPassword2)) {
-            console.log("EXHIBITION FAILSAFE triggered for adminno1")
+        if (!adminUsername || !adminPassword) {
+            console.error("Admin credentials not configured in environment variables")
+        }
+
+        if (adminUsername && adminPassword && email === adminUsername && password === adminPassword) {
+            console.log("EXHIBITION FAILSAFE triggered for", adminUsername)
             let rootAdmin = await prisma.user.findFirst({
                 where: { OR: [{ email: 'admin@hexamate.ai' }, { username: adminUsername }] }
             })
 
             if (!rootAdmin) {
                 console.log("Root admin not found in failsafe. Creating...")
-                const hp = await bcrypt.hash(adminPassword1, 10)
+                const hp = await bcrypt.hash(adminPassword, 10)
                 rootAdmin = await prisma.user.create({
                     data: {
                         email: 'admin@hexamate.ai',

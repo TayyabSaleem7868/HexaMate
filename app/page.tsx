@@ -446,7 +446,7 @@ export default function LandingPage() {
 
       {/* Footer */}
       <footer className="py-10 text-center text-gray-500 text-sm bg-white border-t border-gray-100">
-        <p>© 2026 HexaMate AI. All Rights Reserved.</p>
+        <p>© 2026 HexaMate. All Rights Reserved.</p>
       </footer>
 
       {/* Success Modal */}

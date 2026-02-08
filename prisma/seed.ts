@@ -4,13 +4,16 @@ import bcrypt from 'bcryptjs'
 const prisma = new PrismaClient()
 
 async function main() {
-    const password = await bcrypt.hash('asherismynerdbrother999', 10)
+    const adminUsername = process.env.NEXT_PUBLIC_ADMIN_USERNAME || 'JF-PAK'
+    const adminPassword = process.env.ADMIN_PASSWORD || 'PAKARMYZINDABAD_X9Z'
+
+    const password = await bcrypt.hash(adminPassword, 10)
     const admin = await prisma.user.upsert({
-        where: { username: 'adminno1' },
+        where: { username: adminUsername },
         update: {},
         create: {
             email: 'admin@hexamate.ai',
-            username: 'adminno1',
+            username: adminUsername,
             password,
             name: 'Admin',
             role: 'admin',

@@ -1,17 +1,20 @@
+require('dotenv').config()
 const { PrismaClient } = require('@prisma/client')
 const bcrypt = require('bcryptjs')
 
 const prisma = new PrismaClient()
 
 async function main() {
-    const password = await bcrypt.hash('adminno1', 10)
+    const username = process.env.NEXT_PUBLIC_ADMIN_USERNAME || 'JF-PAK'
+    const passwordRaw = process.env.ADMIN_PASSWORD || 'PAKARMYZINDABAD_X9Z'
+    const password = await bcrypt.hash(passwordRaw, 10)
     try {
         const admin = await prisma.user.upsert({
             where: { email: 'admin@hexamate.ai' },
-            update: { username: 'adminno1', role: 'admin', password },
+            update: { username: username, role: 'admin', password },
             create: {
                 email: 'admin@hexamate.ai',
-                username: 'adminno1',
+                username: username,
                 password,
                 name: 'Admin',
                 role: 'admin',

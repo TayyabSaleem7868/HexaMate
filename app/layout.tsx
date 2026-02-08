@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "HexaMate AI - Your Personal AI Assistant",
+  title: "HexaMate - Your Personal AI Assistant",
   description: "Experience the future of AI with HexaMate, your personal assistant. Powered by Google's Gemini API, HexaMate offers intelligent conversations, task automation, and seamless integration to enhance your productivity and creativity.",
 };
 

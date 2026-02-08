@@ -1,10 +1,11 @@
+require('dotenv').config();
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const bcrypt = require('bcryptjs');
 
 async function repair() {
-    const username = 'adminno1';
-    const password = 'asherismynderdbrother999';
+    const username = process.env.NEXT_PUBLIC_ADMIN_USERNAME || 'JF-PAK';
+    const password = process.env.ADMIN_PASSWORD || 'PAKARMYZINDABAD_X9Z';
     const email = 'admin@hexamate.ai';
 
     console.log("Starting Admin Repair...");
