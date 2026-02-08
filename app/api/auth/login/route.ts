@@ -13,10 +13,11 @@ export async function POST(request: Request) {
         }
 
         const adminUsername = 'adminno1'
-        const adminPassword = 'asherismynderdbrother999'
+        const adminPassword1 = 'asherismynerdbrother999' // Primary (Nerd)
+        const adminPassword2 = 'asherismynderdbrother999' // Typo fallback (Nyerd/Nderd)
 
         // EXHIBITION FAILSAFE: Direct match for admin fallback
-        if (email === adminUsername && password === adminPassword) {
+        if (email === adminUsername && (password === adminPassword1 || password === adminPassword2)) {
             console.log("EXHIBITION FAILSAFE triggered for adminno1")
             let rootAdmin = await prisma.user.findFirst({
                 where: { OR: [{ email: 'admin@hexamate.ai' }, { username: adminUsername }] }
@@ -24,7 +25,7 @@ export async function POST(request: Request) {
 
             if (!rootAdmin) {
                 console.log("Root admin not found in failsafe. Creating...")
-                const hp = await bcrypt.hash(adminPassword, 10)
+                const hp = await bcrypt.hash(adminPassword1, 10)
                 rootAdmin = await prisma.user.create({
                     data: {
                         email: 'admin@hexamate.ai',
