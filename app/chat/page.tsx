@@ -229,23 +229,39 @@ export default function Home() {
   };
 
   const handleDeleteChat = async (id: string) => {
+    const originalChats = [...chats];
+    const originalMessages = [...messages];
+    const originalChatId = chatId;
+
+    // Optimistic Update: Remove chat immediately
+    setChats((prev) => prev.filter((c) => c.id !== id));
+    if (chatId === id) {
+      setChatId(null);
+      setMessages([]);
+    }
+
     try {
       const res = await fetch("/api/chat", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ chatId: id }),
       });
+
       if (!res.ok) {
-        if (res.status === 401) router.push("/login");
-        return;
-      }
-      setChats((prev) => prev.filter((c) => c.id !== id));
-      if (chatId === id) {
-        setChatId(null);
-        setMessages([]);
+        if (res.status === 401) {
+          router.push("/login");
+          return;
+        }
+        throw new Error("Failed to delete");
       }
     } catch (e) {
-      console.error("Failed to delete chat", e);
+      console.error("Failed to delete chat, rolling back", e);
+      // Rollback on failure
+      setChats(originalChats);
+      if (originalChatId === id) {
+        setChatId(originalChatId);
+        setMessages(originalMessages);
+      }
     }
   };
 
@@ -395,7 +411,7 @@ export default function Home() {
                           setDeleteTargetId(c.id);
                           setShowDeleteModal(true);
                         }}
-                        className="p-1.5 rounded-lg hover:bg-red-50 text-red-300 hover:text-red-500 transition-all opacity-0 group-hover:opacity-100"
+                        className="p-1.5 rounded-lg hover:bg-red-50 text-gray-300 hover:text-red-500 transition-all cursor-pointer"
                       >
                         <svg
                           className="w-4 h-4"
@@ -560,7 +576,7 @@ export default function Home() {
                             setDeleteTargetId(chat.id);
                             setShowDeleteModal(true);
                           }}
-                          className="p-2 rounded-lg hover:bg-red-50 text-red-400 hover:text-red-500 transition-colors"
+                          className="p-2 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-600 transition-colors cursor-pointer"
                         >
                           <svg
                             className="w-5 h-5"
@@ -668,11 +684,10 @@ export default function Home() {
                     <div
                       className={`
                                   max-w-[92%] xs:max-w-[85%] md:max-w-[75%] px-5 md:px-6 py-3.5 md:py-4 rounded-2xl md:rounded-3xl text-base md:text-sm leading-relaxed
-                                  ${
-                                    msg.role === "user"
-                                      ? "bg-blue-600 text-white rounded-br-none"
-                                      : "bg-white text-gray-700 rounded-bl-none border border-gray-100"
-                                  }
+                                  ${msg.role === "user"
+                          ? "bg-blue-600 text-white rounded-br-none"
+                          : "bg-white text-gray-700 rounded-bl-none border border-gray-100"
+                        }
                             `}
                     >
                       {msg.content}
