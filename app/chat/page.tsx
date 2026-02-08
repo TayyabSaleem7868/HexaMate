@@ -601,7 +601,7 @@ export default function Home() {
                     </div>
                     <button
                       onClick={handleLogout}
-                      className="p-2.5 rounded-xl hover:bg-gray-50 transition-colors"
+                      className="p-2.5 rounded-xl hover:bg-[#E8EAED] transition-colors"
                     >
                       <svg
                         className="w-5 h-5 text-gray-400"
@@ -718,7 +718,7 @@ export default function Home() {
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   placeholder="Ask anything..."
-                  className="w-full pl-5 md:pl-6 pr-14 md:pr-16 py-3.5 md:py-4 rounded-full bg-white border border-gray-100 outline-none transition-all placeholder-gray-400 text-base focus:border-blue-200"
+                  className="w-full pl-5 md:pl-6 pr-14 md:pr-16 py-3.5 md:py-4 rounded-full bg-[#E8EAED] border border-gray-100 outline-none transition-all placeholder-gray-400 text-base focus:border-blue-200"
                 />
                 <button
                   type="submit"

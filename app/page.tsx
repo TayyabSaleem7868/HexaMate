@@ -379,7 +379,7 @@ export default function LandingPage() {
                     id="name"
                     name="name"
                     type="text"
-                    className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-100 focus:border-blue-400 outline-none transition-all placeholder-gray-400 text-gray-800"
+                    className="w-full bg-[#E8EAED] border border-gray-100 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-100 focus:border-[#101828] outline-none transition-all placeholder-gray-400 text-gray-800"
                     placeholder="John Doe"
                   />
                   <ValidationError
@@ -397,7 +397,7 @@ export default function LandingPage() {
                     id="email"
                     name="email"
                     type="email"
-                    className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-100 focus:border-blue-400 outline-none transition-all placeholder-gray-400 text-gray-800"
+                    className="w-full bg-[#E8EAED] border border-gray-100 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-100 focus:border-[#101828] outline-none transition-all placeholder-gray-400 text-gray-800"
                     placeholder="john@example.com"
                   />
                   <ValidationError
@@ -418,7 +418,7 @@ export default function LandingPage() {
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   rows={4}
-                  className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-100 focus:border-blue-400 outline-none transition-all placeholder-gray-400 text-gray-800 resize-none"
+                  className="w-full bg-[#E8EAED] border border-gray-100 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-100 focus:border-[#101828] outline-none transition-all placeholder-gray-400 text-gray-800 resize-none"
                   placeholder="How can we help?"
                 ></textarea>
                 <ValidationError
@@ -432,8 +432,8 @@ export default function LandingPage() {
                 type="submit"
                 disabled={state.submitting || !isMessageValid}
                 className={`w-full py-4 rounded-xl font-bold transition-all ${isMessageValid
-                    ? "bg-blue-600 hover:bg-blue-700 text-white cursor-pointer"
-                    : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                    ? "bg-[#101828] hover:bg-[#101828] text-white cursor-pointer"
+                    : "bg-gray-300 text-gray-400 cursor-not-allowed"
                   } disabled:opacity-50`}
               >
                 {state.submitting ? "Sending..." : "Send Message"}

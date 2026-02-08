@@ -45,7 +45,7 @@ export default function AdminDashboard() {
         fetchUsers()
     }, [])
 
-    if (loading) return <div className="p-8 text-white bg-black min-h-screen">Loading mainframe...</div>
+    if (loading) return <div className="p-8 text-white bg-black min-h-screen">Loading the panel...</div>
 
     return (
         <div className="min-h-screen bg-black text-white-400 font-mono p-8">
@@ -53,7 +53,7 @@ export default function AdminDashboard() {
                 <header className="flex flex-col xs:flex-row justify-between items-center mb-8 border-b border-blue-800 pb-4 gap-4">
                     <h1 className="text-xl xs:text-2xl md:text-3xl font-bold text-center xs:text-left">HEXAMATE ADMIN PANEL</h1>
                     <button onClick={() => router.push('/')} className="w-full xs:w-auto px-4 py-2 border border-blue-600 hover:bg-blue-900 rounded cursor-pointer transition text-sm">
-                        Exit to Frontend
+                        Exit Admin Panel
                     </button>
                 </header>
 
@@ -87,7 +87,7 @@ export default function AdminDashboard() {
                         </tbody>
                     </table>
                     {users.length === 0 && (
-                        <div className="p-8 text-center text-gray-500">No users found in the matrix.</div>
+                        <div className="p-8 text-center text-gray-500">No users found in the system.</div>
                     )}
                 </div>
             </div>
