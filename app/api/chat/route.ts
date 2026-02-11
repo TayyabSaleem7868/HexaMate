@@ -127,72 +127,78 @@ export async function POST(request: Request) {
         }))
 
 
-        const modelName = process.env.GOOGLE_MODEL || 'models/gemini-2.5-flash'
-        console.debug('[api/chat] using model:', modelName)
-        const genAI = new GoogleGenerativeAI(apiKey)
-        const model = genAI.getGenerativeModel({ model: modelName })
-
-        let aiText = ''
-        try {
-            const result = await model.generateContent({ contents, systemInstruction: undefined })
-            const response = result?.response
-            const candidate = response?.candidates?.[0]
-            const content = candidate?.content
-            const parts = content?.parts ?? []
-            aiText = parts.map((p: any) => p.text ?? '').join('')
-
-            if (!aiText) {
-                aiText = ((candidate as any)?.content?.text) ?? ((response as any)?.text) ?? ''
-            }
-        } catch (e: any) {
-            console.error('[api/chat] Google Generative API error:', e?.message ?? e)
-            if (e instanceof GoogleGenerativeAIResponseError && (e as any).response) {
-                const resp = (e as any).response
-                const status = resp.status ?? 502
-                if (status === 404) {
-                    console.error('[api/chat] upstream response body:', resp)
-                    return NextResponse.json({ error: { message: `Upstream model not found: ${modelName}. The model may be unsupported for this API version. Try setting GOOGLE_MODEL to a supported model (e.g. models/text-bison-001) or call ListModels to inspect available models.` } }, { status: 502 })
-                }
-
-                console.error('[api/chat] upstream response body:', resp)
-                return NextResponse.json({ error: { message: e.message } }, { status })
-            }
-
-            return NextResponse.json({ error: { message: e?.message ?? 'Upstream service error' } }, { status: 502 })
-        }
-
+        const modelName = process.env.GOOGLE_MODEL || "gemini-1.5-flash";
+        console.debug("[api/chat] using model:", modelName);
+        const genAI = new GoogleGenerativeAI(apiKey);
+        const model = genAI.getGenerativeModel({ model: modelName });
 
         if (!isExistingChat) {
-            const firstUser = pendingUserMessages[0]
-            const titleSource = (firstUser?.content ?? firstUser?.text ?? 'Conversation').toString()
-            const title = (titleSource.substring(0, 30)) + (titleSource.length > 30 ? '...' : '')
-            const newChat = await prisma.chat.create({ data: { title, userId: session.id } })
-            currentChatId = newChat.id
+            const firstUser = pendingUserMessages[0];
+            const titleSource = (firstUser?.content ?? firstUser?.text ?? "Conversation").toString();
+            const title = titleSource.substring(0, 30) + (titleSource.length > 30 ? "..." : "");
+            const newChat = await prisma.chat.create({ data: { title, userId: session.id } });
+            currentChatId = newChat.id;
 
             for (const m of pendingUserMessages) {
                 await prisma.message.create({
                     data: {
-                        content: (m.content ?? m.text ?? '').toString(),
-                        role: 'user',
+                        content: (m.content ?? m.text ?? "").toString(),
+                        role: "user",
                         chatId: currentChatId,
                     }
-                })
+                });
             }
-
-            await prisma.message.create({ data: { content: aiText, role: 'assistant', chatId: currentChatId } })
-
-            await prisma.chat.update({ where: { id: currentChatId }, data: { updatedAt: new Date() } })
-
-            return NextResponse.json({ chatId: currentChatId, text: aiText })
         }
 
-        await prisma.message.create({ data: { content: aiText, role: 'assistant', chatId: currentChatId } })
-        await prisma.chat.update({ where: { id: currentChatId }, data: { updatedAt: new Date() } })
+        const chatUuid = currentChatId!;
 
-        return NextResponse.json({ chatId: currentChatId, text: aiText })
+        // Use streaming output
+        const result = await model.generateContentStream({ contents, systemInstruction: undefined });
+
+        const stream = new ReadableStream({
+            async start(controller) {
+                let fullAiText = "";
+                try {
+                    for await (const chunk of result.stream) {
+                        const chunkText = chunk.text();
+                        fullAiText += chunkText;
+                        controller.enqueue(new TextEncoder().encode(chunkText));
+                    }
+
+                    // Save the complete AI message to the database
+                    await prisma.message.create({
+                        data: {
+                            content: fullAiText,
+                            role: "assistant",
+                            chatId: chatUuid,
+                        }
+                    });
+
+                    await prisma.chat.update({
+                        where: { id: chatUuid },
+                        data: { updatedAt: new Date() }
+                    });
+
+                    controller.close();
+                } catch (e: any) {
+                    console.error("[api/chat] Streaming error:", e);
+                    controller.error(e);
+                }
+            }
+        });
+
+        return new Response(stream, {
+            headers: {
+                "Content-Type": "text/plain; charset=utf-8",
+                "X-Chat-ID": chatUuid,
+                "X-Accel-Buffering": "no",
+                "Cache-Control": "no-cache, no-transform",
+                "Connection": "keep-alive",
+            }
+        });
     } catch (error: any) {
-        console.error('[api/chat] Server error:', error?.message ?? error)
-        return NextResponse.json({ error: { message: error?.message ?? 'Server error' } }, { status: 500 })
+        console.error("[api/chat] Server error:", error?.message ?? error);
+        return NextResponse.json({ error: { message: error?.message ?? "Server error" } }, { status: 500 });
     }
 }
 

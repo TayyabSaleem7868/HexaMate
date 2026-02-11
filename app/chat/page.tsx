@@ -5,6 +5,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+
 interface Message {
   role: "user" | "model";
   content: string;
@@ -17,8 +20,71 @@ interface ChatSummary {
   lastMessage?: string | null;
 }
 
+const TypewriterMarkdown = ({ content, speed = 5, isLatest = false }: { content: string; speed?: number; isLatest?: boolean }) => {
+  const [displayedContent, setDisplayedContent] = useState(isLatest ? "" : content);
+  const [isCaughtUp, setIsCaughtUp] = useState(!isLatest);
+
+  useEffect(() => {
+    if (!isLatest) {
+      setDisplayedContent(content);
+      setIsCaughtUp(true);
+      return;
+    }
+
+    if (displayedContent === content) {
+      setIsCaughtUp(true);
+      return;
+    }
+    setIsCaughtUp(false);
+
+    const timeout = setTimeout(() => {
+      const diff = content.length - displayedContent.length;
+      // Adaptive speed: catch up faster if far behind
+      const charsToAdd = diff > 200 ? 15 : diff > 100 ? 8 : diff > 50 ? 4 : 2;
+
+      setDisplayedContent(content.slice(0, displayedContent.length + charsToAdd));
+    }, speed);
+
+    return () => clearTimeout(timeout);
+  }, [content, displayedContent, speed, isLatest]);
+
+  useEffect(() => {
+    if (content.length < displayedContent.length) {
+      setDisplayedContent(content);
+    }
+  }, [content, displayedContent.length]);
+
+  return (
+    <div className="prose prose-sm max-w-none dark:prose-invert">
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
+        components={{
+          p: ({ children }) => <p className="mb-2 last:mb-0 whitespace-pre-wrap">{children}</p>,
+          ul: ({ children }) => <ul className="list-disc pl-4 mb-2">{children}</ul>,
+          ol: ({ children }) => <ol className="list-decimal pl-4 mb-2">{children}</ol>,
+          li: ({ children }) => <li className="mb-1">{children}</li>,
+          code: ({ children }) => (
+            <code className="bg-gray-100 px-1 py-0.5 rounded text-red-500 font-mono text-xs">
+              {children}
+            </code>
+          ),
+          strong: ({ children }) => <strong className="font-bold text-gray-900">{children}</strong>,
+          a: ({ children, href }) => (
+            <a href={href} className="text-blue-500 hover:underline" target="_blank" rel="noopener noreferrer">
+              {children}
+            </a>
+          ),
+        }}
+      >
+        {displayedContent}
+      </ReactMarkdown>
+    </div>
+  );
+};
+
 export default function Home() {
   const [messages, setMessages] = useState<Message[]>([]);
+  // ... rest of the states ...
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [chatId, setChatId] = useState<string | null>(null);
@@ -176,9 +242,32 @@ export default function Home() {
         return;
       }
 
-      const data = await res.json();
-      setChatId(data.chatId);
-      setMessages((prev) => [...prev, { role: "model", content: data.text }]);
+      const returnedChatId = res.headers.get("X-Chat-ID");
+      if (returnedChatId) setChatId(returnedChatId);
+
+      const reader = res.body?.getReader();
+      if (!reader) throw new Error("No reader");
+
+      const decoder = new TextDecoder();
+      let aiContent = "";
+
+      setMessages((prev) => [...prev, { role: "model", content: "" }]);
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value, { stream: true });
+        aiContent += chunk;
+
+        setMessages((prev) => {
+          const last = prev[prev.length - 1];
+          if (last && last.role === "model") {
+            return [...prev.slice(0, -1), { ...last, content: aiContent }];
+          }
+          return prev;
+        });
+      }
 
       fetchChats(search);
     } catch (error) {
@@ -668,7 +757,7 @@ export default function Home() {
                 {messages.map((msg, idx) => (
                   <motion.div
                     key={idx}
-                    initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                    initial={(msg.role === "model" && isLoading && idx === messages.length - 1) ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 20, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     transition={{ duration: 0.3, ease: "easeOut" }}
                     className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
@@ -678,16 +767,23 @@ export default function Home() {
                                   max-w-[92%] xs:max-w-[85%] md:max-w-[75%] px-5 md:px-6 py-3.5 md:py-4 rounded-2xl md:rounded-3xl text-base md:text-sm leading-relaxed
                                   ${msg.role === "user"
                           ? "bg-blue-600 text-white rounded-br-none"
-                          : "bg-white text-gray-700 rounded-bl-none border border-gray-100"
+                          : "bg-white text-gray-700 rounded-bl-none border border-gray-100 shadow-sm"
                         }
                             `}
                     >
-                      {msg.content}
+                      {msg.role === "model" ? (
+                        <TypewriterMarkdown
+                          content={msg.content}
+                          isLatest={idx === messages.length - 1 && isLoading}
+                        />
+                      ) : (
+                        msg.content
+                      )}
                     </div>
                   </motion.div>
                 ))}
               </AnimatePresence>
-              {isLoading && (
+              {isLoading && messages[messages.length - 1]?.role !== "model" && (
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
